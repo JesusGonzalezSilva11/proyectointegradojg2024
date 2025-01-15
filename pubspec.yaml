@@ -1,0 +1,27 @@
+name: proyectointegradojg2024
+description: "A new Flutter project."
+publish_to: 'none' # Eliminar esta línea si deseas publicar en pub.dev
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.5.4
+
+dependencies:
+  flutter:
+    sdk: flutter
+  firebase_core: ^2.0.0
+  cloud_firestore: ^4.0.0
+  cupertino_icons: ^1.0.8
+  regexed_validator: ^2.0.0+1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+
+platforms:
+  windows:

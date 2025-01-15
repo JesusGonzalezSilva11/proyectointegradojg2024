@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "866008257966",
+    "project_id": "proyectointegradojg2024",
+    "storage_bucket": "proyectointegradojg2024.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:866008257966:android:a5d4ba7f3284e62827e43f",
+        "android_client_info": {
+          "package_name": "com.example.proyectointegradojg2024"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCXpxYl2xPwf8mqesYUENxaMpAn2bxVQPg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
