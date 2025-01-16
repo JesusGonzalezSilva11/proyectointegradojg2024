@@ -26,6 +26,7 @@ class _MenuScreenState extends State<MenuScreen> {
   bool viewingParticipant = false;
   FirebaseDB firebaseDB = FirebaseDB();
 
+
   @override
   void initState() {
     super.initState();
@@ -37,6 +38,17 @@ class _MenuScreenState extends State<MenuScreen> {
     try {
       List<Busqueda> loadedSearches = await FirebaseDB().leerBusquedas();
       List<Actividad> loadedActivities = await FirebaseDB().leerActividades();
+
+      // Imprimir las listas cargadas en la terminal para depuración
+      print("Busquedas cargadas:");
+      loadedSearches.forEach((search) {
+        print("ID: ${search.id}, Nombre: ${search.nombre}, Descripción: ${search.descripcion}");
+      });
+
+      print("Actividades cargadas:");
+      loadedActivities.forEach((activity) {
+        print("ID: ${activity.id}, Nombre: ${activity.nombre}, Descripción: ${activity.descripcion}");
+      });
 
       setState(() {
         searches = loadedSearches;
@@ -66,38 +78,51 @@ class _MenuScreenState extends State<MenuScreen> {
   // Función para filtrar las búsquedas o actividades del usuario
   void _filterUserItems() {
     setState(() {
+      print("Inicio del filtrado");
+
       if (mostrarAcciones) {
         if (viewingSearches) {
+          print("Filtrando búsquedas...");
           if (viewingVolunteer) {
             // Filtrar búsquedas donde el usuario está como voluntario
             filteredSearches = searches.where((busqueda) {
-              return busqueda.voluntarioId == widget.persona.dni &&
+              bool isVolunteer = busqueda.voluntarioId == widget.persona.dni &&
                   busqueda.consumidorId != widget.persona.dni;
+              print("Buscando voluntario - $isVolunteer: ${busqueda.nombre}");
+              return isVolunteer;
             }).toList();
           } else {
-            // Filtrar búsquedas creadas por el usuario
+            // Filtrar búsquedas creadas por el consumidor (el usuario)
             filteredSearches = searches.where((busqueda) {
-              return busqueda.consumidorId == widget.persona.dni;
+              bool isCreator = busqueda.consumidorId == widget.persona.dni;
+              print("Buscando creadas por el consumidor - $isCreator: ${busqueda.nombre}");
+              return isCreator;
             }).toList();
           }
+          print("Lista filtrada de búsquedas: $filteredSearches");
         } else {
+          print("Filtrando actividades...");
           if (viewingParticipant) {
-            // Filtrar actividades donde el usuario está participando
+            // Filtrar actividades donde el usuario es un participante
             filteredActivities = activities.where((actividad) {
-              return actividad.participantes.contains(widget.persona.dni) &&
+              bool isParticipant = actividad.participantes.contains(widget.persona.dni) &&
                   actividad.ofertanteId != widget.persona.dni;
+              print("Buscando actividades de participantes - $isParticipant: ${actividad.nombre}");
+              return isParticipant;
             }).toList();
           } else {
-            // Filtrar actividades creadas por el usuario
+            // Filtrar actividades creadas por el ofertante (el usuario)
             filteredActivities = activities.where((actividad) {
-              return actividad.ofertanteId == widget.persona.dni;
+              bool isCreator = actividad.ofertanteId == widget.persona.dni;
+              print("Buscando creadas por el ofertante - $isCreator: ${actividad.nombre}");
+              return isCreator;
             }).toList();
           }
+          print("Lista filtrada de actividades: $filteredActivities");
         }
       } else {
         // Mostrar todas las búsquedas y actividades si no está en "Acciones"
-        filteredSearches = List.from(searches);
-        filteredActivities = List.from(activities);
+        print("No está en Acciones, mostrando todas las búsquedas y actividades.");
       }
     });
   }
@@ -166,10 +191,8 @@ class _MenuScreenState extends State<MenuScreen> {
           // Mostrar las acciones si está activado
           Expanded(
             child: viewingSearches
-                ? _buildSearchesList(
-                filteredSearches) // Mostrar las búsquedas filtradas
-                : _buildActivitiesList(
-                filteredActivities), // Mostrar las actividades filtradas
+                ? _buildSearchesList() // Mostrar las búsquedas filtradas
+                : _buildActivitiesList(), // Mostrar las actividades filtradas
           ),
           _buildCreateButton(),
           // Nuevo widget que gestiona los botones dinámicos
@@ -263,8 +286,7 @@ class _MenuScreenState extends State<MenuScreen> {
     );
   }
 
-  Widget _buildActionButton(String label, bool isActive,
-      VoidCallback onPressed) {
+  Widget _buildActionButton(String label, bool isActive, VoidCallback onPressed) {
     return ElevatedButton(
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
@@ -283,11 +305,13 @@ class _MenuScreenState extends State<MenuScreen> {
   }
 
   // Métodos para construir la lista de búsquedas y actividades
-  Widget _buildSearchesList(List<dynamic> filteredSearches) {
+  Widget _buildSearchesList() {
+    print('Mostrando lista de búsquedas: $filteredSearches');
     return ListView.builder(
       itemCount: filteredSearches.length,
       itemBuilder: (context, index) {
         var busqueda = filteredSearches[index];
+        print('Buscando item $index: ${busqueda.nombre}');
         return ListTile(
           title: Text(busqueda.nombre),
           subtitle: Text(busqueda.descripcion),
@@ -299,11 +323,13 @@ class _MenuScreenState extends State<MenuScreen> {
     );
   }
 
-  Widget _buildActivitiesList(List<dynamic> filteredActivities) {
+  Widget _buildActivitiesList() {
+    print('Mostrando lista de actividades: $filteredActivities');
     return ListView.builder(
       itemCount: filteredActivities.length,
       itemBuilder: (context, index) {
         var actividad = filteredActivities[index];
+        print('Buscando item $index: ${actividad.nombre}');
         return ListTile(
           title: Text(actividad.nombre),
           subtitle: Text(actividad.descripcion),
@@ -1241,45 +1267,45 @@ class _MenuScreenState extends State<MenuScreen> {
     );
   }
 
-  void _filterList(String query) {
-    setState(() {
-      if (query.isEmpty) {
-        // Restaurar la lista completa cuando el campo de búsqueda está vacío
-        filteredSearches = List.from(searches);
-        filteredActivities = List.from(activities);
-      } else {
-        // Filtrar búsquedas
-        filteredSearches = searches.where((item) {
-          final lowerCaseQuery = query.toLowerCase();
-          final itemName = item.nombre?.toLowerCase() ?? '';
-          return itemName.contains(lowerCaseQuery);
-        }).toList();
+// Función para filtrar la lista de búsquedas y actividades
+  void filterList(String query) {
+    print('Texto ingresado en la búsqueda: $query');
 
-        // Filtrar actividades
-        filteredActivities = activities.where((item) {
-          final lowerCaseQuery = query.toLowerCase();
-          final itemName = item.nombre?.toLowerCase() ?? '';
-          return itemName.contains(lowerCaseQuery);
-        }).toList();
-      }
-    });
+    // Filtrar las búsquedas basándose en la lista original
+    filteredSearches = searches.where((busqueda) {
+      return busqueda.nombre.toLowerCase().contains(query.toLowerCase());
+    }).toList();
+
+    // Filtrar las actividades basándose en la lista original
+    filteredActivities = activities.where((actividad) {
+      return actividad.nombre.toLowerCase().contains(query.toLowerCase());
+    }).toList();
+
+    print('Lista filtrada de búsquedas: $filteredSearches');
+    print('Lista filtrada de actividades: $filteredActivities');
+
+    // Llamar a setState para actualizar la UI
+    setState(() {});
   }
 
   Widget _buildSearchBar() {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(16.0),
       child: TextField(
         controller: _searchController,
-        keyboardType: TextInputType.visiblePassword,
+        onChanged: (query) {
+          print('Cambio en la barra de búsqueda: $query');  // Muestra el cambio en la barra
+          filterList(query); // Llama al filtro cada vez que cambia el texto
+        },
         decoration: InputDecoration(
-          labelText: 'Buscar',
-          prefixIcon: Icon(Icons.search),
+          labelText: 'Buscar...',
+          prefixIcon: const Icon(Icons.search),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8.0),
+            borderRadius: BorderRadius.circular(8),
           ),
         ),
-        onChanged: _filterList,
       ),
     );
   }
+
 }

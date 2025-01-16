@@ -20,4 +20,8 @@ class Busqueda {
     required this.requisitos,
     this.voluntarioId, // Si no hay un voluntario, este campo puede ser null
   });
+  @override
+  String toString() {
+    return 'Busqueda(nombre: $nombre, descripcion: $descripcion)';
+  }
 }

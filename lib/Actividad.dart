@@ -22,4 +22,8 @@ class Actividad {
     this.numParticipantes = 0,
     this.participantes = const [],
   });
+  @override
+  String toString() {
+    return 'Actividad(nombre: $nombre, descripcion: $descripcion)';
+  }
 }
