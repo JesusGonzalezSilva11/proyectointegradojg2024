@@ -323,6 +323,7 @@ class _MenuScreenState extends State<MenuScreen> {
     );
   }
 
+
   Widget _buildActivitiesList() {
     print('Mostrando lista de actividades: $filteredActivities');
     return ListView.builder(
